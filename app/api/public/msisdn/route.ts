@@ -3,6 +3,9 @@ import { getSimByIccid } from '@/services/sim.service'
 import { PublicMsisdnQuerySchema } from '@/lib/validation'
 import { ZodError } from 'zod'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/public/msisdn
  * Public API for ICCID → MSISDN lookup

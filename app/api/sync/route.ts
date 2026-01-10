@@ -3,6 +3,9 @@ import { syncAllServices } from '@/services/sync.service'
 import { SyncQuerySchema } from '@/lib/validation'
 import { ZodError } from 'zod'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/sync
  * Trigger sync from external Supabase services

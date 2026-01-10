@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { importSimsFromCsv } from '@/services/import.service'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/sims/import
  * Import SIMs from CSV file

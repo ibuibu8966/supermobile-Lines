@@ -3,6 +3,9 @@ import { getSimsList, upsertSim } from '@/services/sim.service'
 import { SimListQuerySchema, CreateSimSchema } from '@/lib/validation'
 import { ZodError } from 'zod'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/sims
  * List SIMs with filtering and pagination

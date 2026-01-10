@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { CreateUsageTagSchema } from '@/lib/validation'
 import { ZodError } from 'zod'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/usage-tags
  * Get all usage tags

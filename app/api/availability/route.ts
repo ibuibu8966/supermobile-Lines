@@ -3,6 +3,9 @@ import { calculateAvailability } from '@/services/availability.service'
 import { AvailabilityQuerySchema } from '@/lib/validation'
 import { ZodError } from 'zod'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/availability
  * Calculate available SIM count for a usage tag and date range
