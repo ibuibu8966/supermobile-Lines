@@ -290,9 +290,74 @@ npm start
 - [ ] Phase 5: 履歴・ルール管理
 - [ ] Phase 6: 公開API・本番対応
 
+## Vercelへのデプロイ
+
+### 1. データベースの準備
+
+以下のいずれかを選択：
+
+**オプションA: Vercel Postgres（推奨）**
+- Vercel Dashboard → Storage → Create Database → Postgres
+- 自動的に環境変数が設定されます
+
+**オプションB: 外部PostgreSQL（Supabase、Neon、Railway等）**
+- データベースを作成し、接続文字列を取得
+
+### 2. 環境変数の設定
+
+Vercel Dashboard → Settings → Environment Variables で以下を設定：
+
+```bash
+# データベース（必須）
+DATABASE_URL=postgresql://...?pgbouncer=true
+DIRECT_URL=postgresql://...  # Vercel Postgresの場合は自動設定
+
+# 暗号化キー（32文字以上、必須）
+ENCRYPTION_KEY=your-32-char-key
+
+# 公開APIキー（必須）
+PUBLIC_API_KEY=your-api-key
+
+# アプリURL
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+NODE_ENV=production
+```
+
+### 3. データベースマイグレーション
+
+初回デプロイ後、ターミナルで以下を実行：
+
+```bash
+# Vercel CLIを使用
+npx vercel env pull .env.production
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+または、Vercel Dashboardから「Run Command」で実行：
+```bash
+npx prisma migrate deploy && npx prisma db seed
+```
+
 ## トラブルシューティング
 
-### PostgreSQLに接続できない
+### Vercelで500エラーが出る
+
+1. **環境変数の確認**
+   - Vercel Dashboard → Settings → Environment Variables
+   - 全ての必須変数（DATABASE_URL, ENCRYPTION_KEY, PUBLIC_API_KEY）が設定されているか
+
+2. **データベース接続の確認**
+   - DATABASE_URLが正しいか
+   - データベースにVercelからアクセス可能か（ファイアウォール設定）
+
+3. **マイグレーションの実行**
+   - `npx prisma migrate deploy` が実行されているか
+
+4. **ログの確認**
+   - Vercel Dashboard → Deployments → [最新デプロイ] → Runtime Logs
+
+### PostgreSQLに接続できない（ローカル開発）
 
 - `.env` の `DATABASE_URL` が正しいか確認
 - PostgreSQLサービスが起動しているか確認
