@@ -427,20 +427,8 @@ export default function SimsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     仕入れ先契約期間
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                    サービス
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                    顧客ID
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                    用途タグ
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                    顧客契約期間
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                    配送状況
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    契約履歴
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     ステータス
@@ -452,7 +440,7 @@ export default function SimsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedSims.map((sim) => {
-                  const shippingDates = getMostRecentShippingDates(sim.iccid)
+                  const history = simsWithHistory.get(sim.iccid) || []
 
                   return (
                     <tr key={sim.iccid} className="hover:bg-gray-50 transition-colors">
@@ -477,44 +465,29 @@ export default function SimsPage() {
                         {formatDateJP(sim.supplierServiceStartDate)} 〜<br />
                         {formatDateJP(sim.supplierServiceEndDate)}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {sim.currentServiceName || '-'}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {sim.currentCustomerId || '-'}
-                      </td>
                       <td className="px-4 py-4">
-                        {sim.currentUsageTagIds && sim.currentUsageTagIds.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {sim.currentUsageTagIds.map((tagId) => (
-                              <span key={tagId} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium whitespace-nowrap">
-                                {getUsageTagName(tagId)}
-                              </span>
+                        {history.length > 0 ? (
+                          <div className="space-y-2 min-w-[400px]">
+                            {history.map((record, index) => (
+                              <div key={record.id} className="flex items-center gap-2 text-xs border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">
+                                <span className="font-medium text-gray-700 min-w-[80px]">{record.customerId}</span>
+                                <span className="text-gray-500">|</span>
+                                <span className="text-gray-600 min-w-[140px]">
+                                  {formatDateJP(record.contractStartDate)} - {formatDateJP(record.contractEndDate)}
+                                </span>
+                                <span className="text-gray-500">|</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {record.usageTagIds.map((tagId) => (
+                                    <span key={tagId} className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium whitespace-nowrap">
+                                      {getUsageTagName(tagId)}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-600">
-                        {sim.currentContractStartDate && sim.currentContractEndDate ? (
-                          <>
-                            {formatDateJP(sim.currentContractStartDate)} 〜<br />
-                            {formatDateJP(sim.currentContractEndDate)}
-                          </>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-600">
-                        {shippingDates.shipped || shippingDates.arrived || shippingDates.returned ? (
-                          <div className="space-y-0.5">
-                            {shippingDates.shipped && <div>発送: {formatDateJP(shippingDates.shipped)}</div>}
-                            {shippingDates.arrived && <div>到着: {formatDateJP(shippingDates.arrived)}</div>}
-                            {shippingDates.returned && <div>返却: {formatDateJP(shippingDates.returned)}</div>}
-                          </div>
-                        ) : (
-                          '-'
+                          <span className="text-sm text-gray-400">履歴なし</span>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
