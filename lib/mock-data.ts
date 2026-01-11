@@ -12,7 +12,7 @@ export interface MockSim {
   supplierServiceEndDate: Date
   currentServiceName: string | null
   currentCustomerId: string | null
-  currentUsageTagId: number | null
+  currentUsageTagIds: number[] | null
   currentContractStartDate: Date | null
   currentContractEndDate: Date | null
   status: SimStatus
@@ -25,7 +25,7 @@ export interface MockSimHistory {
   iccid: string
   serviceName: string
   customerId: string
-  usageTagId: number
+  usageTagIds: number[]
   contractStartDate: Date
   contractEndDate: Date
   shippedDate: Date | null
@@ -176,8 +176,20 @@ export function generateMockUsageRules(): MockUsageRule[] {
   ]
 }
 
+// Helper function to generate random usage tag IDs (1-3 tags)
+function generateRandomUsageTagIds(): number[] {
+  const tagCount = Math.floor(Math.random() * 3) + 1 // 1-3 tags
+  const selectedTags = new Set<number>()
+
+  while (selectedTags.size < tagCount) {
+    selectedTags.add(randomItem(usageTags).id)
+  }
+
+  return Array.from(selectedTags)
+}
+
 // SIM History Generator
-export function generateMockHistory(iccid: string, simStatus: SimStatus, currentUsageTagId: number | null): MockSimHistory[] {
+export function generateMockHistory(iccid: string, simStatus: SimStatus, currentUsageTagIds: number[] | null): MockSimHistory[] {
   const history: MockSimHistory[] = []
 
   // IN_STOCKの場合は履歴なし、または過去の履歴のみ
@@ -197,7 +209,7 @@ export function generateMockHistory(iccid: string, simStatus: SimStatus, current
           iccid,
           serviceName: randomItem(['物販', 'バーサス', 'Avaris']),
           customerId: 'CUST-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-          usageTagId: randomItem(usageTags).id,
+          usageTagIds: generateRandomUsageTagIds(),
           contractStartDate: contractStart,
           contractEndDate: contractEnd,
           shippedDate: shipped,
@@ -223,7 +235,7 @@ export function generateMockHistory(iccid: string, simStatus: SimStatus, current
       iccid,
       serviceName: randomItem(['物販', 'バーサス', 'Avaris']),
       customerId: 'CUST-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-      usageTagId: currentUsageTagId || randomItem(usageTags).id,
+      usageTagIds: currentUsageTagIds || generateRandomUsageTagIds(),
       contractStartDate: contractStart,
       contractEndDate: contractEnd,
       shippedDate: shipped,
@@ -248,7 +260,7 @@ export function generateMockHistory(iccid: string, simStatus: SimStatus, current
           iccid,
           serviceName: randomItem(['物販', 'バーサス', 'Avaris']),
           customerId: 'CUST-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-          usageTagId: randomItem(usageTags).id,
+          usageTagIds: generateRandomUsageTagIds(),
           contractStartDate: pastContractStart,
           contractEndDate: pastContractEnd,
           shippedDate: pastShipped,
@@ -273,7 +285,7 @@ export function generateMockHistory(iccid: string, simStatus: SimStatus, current
       iccid,
       serviceName: randomItem(['物販', 'バーサス', 'Avaris']),
       customerId: 'CUST-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-      usageTagId: currentUsageTagId || randomItem(usageTags).id,
+      usageTagIds: currentUsageTagIds || generateRandomUsageTagIds(),
       contractStartDate: contractStart,
       contractEndDate: contractEnd,
       shippedDate: shipped,
@@ -299,7 +311,7 @@ export function generateMockHistory(iccid: string, simStatus: SimStatus, current
         iccid,
         serviceName: randomItem(['物販', 'バーサス', 'Avaris']),
         customerId: 'CUST-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-        usageTagId: randomItem(usageTags).id,
+        usageTagIds: generateRandomUsageTagIds(),
         contractStartDate: contractStart,
         contractEndDate: contractEnd,
         shippedDate: shipped,
@@ -350,21 +362,21 @@ export function generateMockSims(count: number = 200): MockSim[] {
     // Current assignment (only for ACTIVE and RETURNING)
     let currentServiceName: string | null = null
     let currentCustomerId: string | null = null
-    let currentUsageTagId: number | null = null
+    let currentUsageTagIds: number[] | null = null
     let currentContractStartDate: Date | null = null
     let currentContractEndDate: Date | null = null
 
     if (status === 'ACTIVE' || status === 'RETURNING') {
       currentServiceName = randomItem(services)
       currentCustomerId = 'CUST-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-      currentUsageTagId = randomItem(usageTags).id
+      currentUsageTagIds = generateRandomUsageTagIds()
       currentContractStartDate = randomDate(new Date('2024-06-01'), new Date('2025-01-01'))
       currentContractEndDate = addDays(currentContractStartDate, 90 + Math.floor(Math.random() * 180))
     }
 
     // IN_STOCKでも稀に用途タグが設定されている（次回販売予定など）
     if (status === 'IN_STOCK' && Math.random() < 0.3) {
-      currentUsageTagId = randomItem(usageTags).id
+      currentUsageTagIds = generateRandomUsageTagIds()
     }
 
     const createdAt = randomDate(new Date('2023-01-01'), new Date('2024-12-31'))
@@ -381,7 +393,7 @@ export function generateMockSims(count: number = 200): MockSim[] {
       supplierServiceEndDate: supplierEnd,
       currentServiceName,
       currentCustomerId,
-      currentUsageTagId,
+      currentUsageTagIds,
       currentContractStartDate,
       currentContractEndDate,
       status,
@@ -473,7 +485,7 @@ export function generateAllMockData() {
   // Generate history for each SIM
   const simsWithHistory = sims.map(sim => ({
     ...sim,
-    history: generateMockHistory(sim.iccid, sim.status, sim.currentUsageTagId)
+    history: generateMockHistory(sim.iccid, sim.status, sim.currentUsageTagIds)
   }))
 
   return {

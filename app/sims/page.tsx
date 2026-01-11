@@ -41,7 +41,7 @@ export default function SimsPage() {
       // Generate history for each SIM
       const historyMap = new Map<string, MockSimHistory[]>()
       sims.forEach(sim => {
-        historyMap.set(sim.iccid, generateMockHistory(sim.iccid, sim.status, sim.currentUsageTagId))
+        historyMap.set(sim.iccid, generateMockHistory(sim.iccid, sim.status, sim.currentUsageTagIds))
       })
 
       setMockSims(sims)
@@ -82,7 +82,7 @@ export default function SimsPage() {
 
       // Usage tags filter
       if (filters.usageTags.length > 0) {
-        if (!sim.currentUsageTagId || !filters.usageTags.includes(sim.currentUsageTagId)) {
+        if (!sim.currentUsageTagIds || !sim.currentUsageTagIds.some(tagId => filters.usageTags.includes(tagId))) {
           return false
         }
       }
@@ -117,7 +117,7 @@ export default function SimsPage() {
   // Calculate summary stats
   const summaryStats = useMemo((): SummaryStats[] => {
     return mockUsageTags.map(tag => {
-      const simsWithTag = filteredSims.filter(s => s.currentUsageTagId === tag.id)
+      const simsWithTag = filteredSims.filter(s => s.currentUsageTagIds?.includes(tag.id))
       const availableCount = simsWithTag.filter(s => s.status === 'IN_STOCK').length
       const inUseCount = simsWithTag.filter(s => s.status === 'ACTIVE').length
 
@@ -160,8 +160,7 @@ export default function SimsPage() {
   }
 
   // Get usage tag name by ID
-  const getUsageTagName = (tagId: number | null): string => {
-    if (!tagId) return '-'
+  const getUsageTagName = (tagId: number): string => {
     const tag = mockUsageTags.find(t => t.id === tagId)
     return tag?.name || '-'
   }
@@ -484,11 +483,15 @@ export default function SimsPage() {
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {sim.currentCustomerId || '-'}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        {sim.currentUsageTagId ? (
-                          <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                            {getUsageTagName(sim.currentUsageTagId)}
-                          </span>
+                      <td className="px-4 py-4">
+                        {sim.currentUsageTagIds && sim.currentUsageTagIds.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {sim.currentUsageTagIds.map((tagId) => (
+                              <span key={tagId} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium whitespace-nowrap">
+                                {getUsageTagName(tagId)}
+                              </span>
+                            ))}
+                          </div>
                         ) : (
                           <span className="text-sm text-gray-400">-</span>
                         )}

@@ -37,7 +37,7 @@ export default function SimDetailPage({ params }: { params: Promise<{ iccid: str
 
       if (foundSim) {
         setSim(foundSim)
-        setHistory(generateMockHistory(foundSim.iccid, foundSim.status, foundSim.currentUsageTagId))
+        setHistory(generateMockHistory(foundSim.iccid, foundSim.status, foundSim.currentUsageTagIds))
         setUsageTags(generateMockUsageTags())
         setMsisdnInput(foundSim.msisdn || '')
       } else {
@@ -252,10 +252,14 @@ export default function SimDetailPage({ params }: { params: Promise<{ iccid: str
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-500">用途タグ</label>
-                {sim.currentUsageTagId ? (
-                  <span className="mt-1 inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                    {getUsageTagName(sim.currentUsageTagId)}
-                  </span>
+                {sim.currentUsageTagIds && sim.currentUsageTagIds.length > 0 ? (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {sim.currentUsageTagIds.map((tagId) => (
+                      <span key={tagId} className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                        {getUsageTagName(tagId)}
+                      </span>
+                    ))}
+                  </div>
                 ) : (
                   <p className="mt-1 text-sm text-gray-400">-</p>
                 )}
@@ -397,15 +401,17 @@ export default function SimDetailPage({ params }: { params: Promise<{ iccid: str
                   {/* Content card */}
                   <div className="flex-1 bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           {record.serviceName}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          {getUsageTagName(record.usageTagId)}
-                        </span>
+                        {record.usageTagIds.map((tagId) => (
+                          <span key={tagId} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {getUsageTagName(tagId)}
+                          </span>
+                        ))}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 flex-shrink-0">
                         {formatDateJP(record.createdAt)}
                       </span>
                     </div>
